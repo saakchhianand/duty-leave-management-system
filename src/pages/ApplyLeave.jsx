@@ -6,13 +6,10 @@ export default function ApplyLeave() {
   const [leaveType, setLeaveType] = useState("DAY");
   const [reason, setReason] = useState("");
 
+  // 🔥 LOAD EVENTS
   useEffect(() => {
-    // fake events
-    const data = [
-      { _id: "1", title: "Hackathon" },
-      { _id: "2", title: "Workshop" }
-    ];
-    setEvents(data);
+    const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
+    setEvents(storedEvents);
   }, []);
 
   const handleSubmit = () => {
@@ -23,48 +20,84 @@ export default function ApplyLeave() {
 
     const newRequest = {
       id: Date.now(),
-      eventId,
+      studentId: "24BCS10185", // temporary
+      eventId: String(eventId), // 🔥 ensure same type
       leaveType,
       reason,
       status: "PENDING"
     };
 
-    // store in localStorage (frontend simulation)
     const existing = JSON.parse(localStorage.getItem("requests")) || [];
     existing.push(newRequest);
     localStorage.setItem("requests", JSON.stringify(existing));
 
-    alert("Leave Applied ✅");
+    alert("Leave Applied");
 
     setEventId("");
     setReason("");
+    setLeaveType("DAY");
   };
 
   return (
-    <div className="container">
-      <h2>Apply Leave</h2>
+    <>
+      {/* HEADER */}
+      <div style={{ marginBottom: "30px" }}>
+        <h2>Apply Leave</h2>
+        <p style={{ color: "#94a3b8", fontSize: "14px" }}>
+          Submit a duty leave request for an event
+        </p>
+      </div>
 
-      <select value={eventId} onChange={(e) => setEventId(e.target.value)}>
-        <option value="">Select Event</option>
-        {events.map((e) => (
-          <option key={e._id} value={e._id}>
-            {e.title}
-          </option>
-        ))}
-      </select>
+      <div className="form-card">
 
-      <select value={leaveType} onChange={(e) => setLeaveType(e.target.value)}>
-        <option value="DAY">Full Day</option>
-        <option value="LECTURE">Lecture</option>
-      </select>
+        {/* EVENT SELECT */}
+        <div className="form-section">
+          <h3>Select Event</h3>
 
-      <input
-        placeholder="Reason"
-        value={reason}
-        onChange={(e) => setReason(e.target.value)}
-      />
+          <select
+            value={eventId}
+            onChange={(e) => setEventId(e.target.value)}
+          >
+            <option value="">Choose event</option>
 
-      <button onClick={handleSubmit}>Submit</button>
-    </div>
+            {events.map((e) => (
+              <option key={e.id} value={String(e.id)}>
+                {e.title} ({e.date})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* LEAVE TYPE */}
+        <div className="form-section">
+          <h3>Leave Type</h3>
+
+          <select
+            value={leaveType}
+            onChange={(e) => setLeaveType(e.target.value)}
+          >
+            <option value="DAY">Full Day</option>
+            <option value="LECTURE">Lecture</option>
+          </select>
+        </div>
+
+        {/* REASON */}
+        <div className="form-section">
+          <h3>Reason</h3>
+
+          <textarea
+            rows="3"
+            placeholder="Enter reason"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+        </div>
+
+        <button onClick={handleSubmit}>
+          Submit Request
+        </button>
+
+      </div>
+    </>
   );
 }

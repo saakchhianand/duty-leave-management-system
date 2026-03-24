@@ -9,14 +9,11 @@ export default function Layout({ children }) {
 
   const [darkMode, setDarkMode] = useState(true);
 
-  // apply theme on load
   useEffect(() => {
     document.body.classList.toggle("light", !darkMode);
   }, [darkMode]);
 
-  const toggleTheme = () => {
-    setDarkMode((prev) => !prev);
-  };
+  const toggleTheme = () => setDarkMode((prev) => !prev);
 
   const isActive = (path) => location.pathname === path;
 
@@ -26,14 +23,14 @@ export default function Layout({ children }) {
       {/* SIDEBAR */}
       <div className="sidebar">
 
-        {/* LOGO / TITLE */}
         <h2 className="neon-text">DLMS</h2>
 
         {/* NAVIGATION */}
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div className="sidebar-menu">
+
           <button
-            className={isActive("/dashboard") ? "active" : ""}
-            onClick={() => navigate("/dashboard")}
+            className={isActive("/student-dashboard") ? "active" : ""}
+            onClick={() => navigate("/student-dashboard")} // ✅ FIXED
           >
             Dashboard
           </button>
@@ -53,17 +50,10 @@ export default function Layout({ children }) {
           </button>
 
           <button
-            className={isActive("/mentor") ? "active" : ""}
-            onClick={() => navigate("/mentor")}
+            className={isActive("/history") ? "active" : ""}
+            onClick={() => navigate("/history")}
           >
-            Mentor Panel
-          </button>
-
-          <button
-            className={isActive("/coordinator") ? "active" : ""}
-            onClick={() => navigate("/coordinator")}
-          >
-            Coordinator
+            My Requests
           </button>
 
           <button
@@ -72,25 +62,44 @@ export default function Layout({ children }) {
           >
             Create Event
           </button>
-        </div>
 
-        {/* BOTTOM SECTION */}
-        <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
-          
-          {/* THEME TOGGLE */}
-          <button onClick={toggleTheme}>
-            {darkMode ? "Switch to Light" : "Switch to Dark"}
+          <button
+            className={isActive("/attendance") ? "active" : ""}
+            onClick={() => navigate("/attendance")}
+          >
+            Upload Attendance
           </button>
 
-          {/* LOGOUT */}
+          <button
+            className={isActive("/coordinator-dashboard") ? "active" : ""}
+            onClick={() => navigate("/coordinator-dashboard")}
+          >
+            Coordinator Dashboard
+          </button>
+
+        </div>
+
+        {/* BOTTOM */}
+        <div
+          style={{
+            marginTop: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px"
+          }}
+        >
+          <button onClick={toggleTheme}>
+            {darkMode ? "Light Mode" : "Dark Mode"}
+          </button>
+
           <button onClick={logout} className="logout">
             Logout
           </button>
-
         </div>
+
       </div>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN */}
       <div className="main">
         {children}
       </div>
