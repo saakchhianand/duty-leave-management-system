@@ -8,8 +8,7 @@ export default function CreateEvent() {
     time: "",
     eligibility: "",
     description: "",
-    poster: "",
-    document: ""
+    poster: ""
   });
 
   const [preview, setPreview] = useState(null);
@@ -17,6 +16,7 @@ export default function CreateEvent() {
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
+    // 🔥 FILE (poster only)
     if (files && files[0]) {
       const file = files[0];
       const reader = new FileReader();
@@ -26,16 +26,15 @@ export default function CreateEvent() {
 
         setForm((prev) => ({
           ...prev,
-          [name]: base64
+          poster: base64
         }));
 
-        if (name === "poster") {
-          setPreview(base64);
-        }
+        setPreview(base64);
       };
 
       reader.readAsDataURL(file);
     } else {
+      // 🔤 TEXT INPUTS
       setForm((prev) => ({
         ...prev,
         [name]: value
@@ -61,6 +60,7 @@ export default function CreateEvent() {
 
     alert("Event Created");
 
+    // 🔄 reset
     setForm({
       title: "",
       category: "",
@@ -68,8 +68,7 @@ export default function CreateEvent() {
       time: "",
       eligibility: "",
       description: "",
-      poster: "",
-      document: ""
+      poster: ""
     });
 
     setPreview(null);
@@ -147,13 +146,12 @@ export default function CreateEvent() {
           />
         </div>
 
-        {/* FILES */}
+        {/* POSTER ONLY */}
         <div className="form-section">
-          <h3>Attachments</h3>
+          <h3>Event Poster</h3>
 
           <input
             type="file"
-            name="poster"
             accept="image/*"
             onChange={handleChange}
           />
@@ -161,15 +159,11 @@ export default function CreateEvent() {
           {preview && (
             <img src={preview} alt="preview" className="preview-img" />
           )}
-
-          <input
-            type="file"
-            name="document"
-            onChange={handleChange}
-          />
         </div>
 
-        <button onClick={handleSubmit}>Create Event</button>
+        <button onClick={handleSubmit}>
+          Create Event
+        </button>
 
       </div>
     </>
