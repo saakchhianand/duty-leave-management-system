@@ -6,6 +6,25 @@ export default function ApplyLeave() {
   const [leaveType, setLeaveType] = useState("DAY");
   const [reason, setReason] = useState("");
 
+  // 🔥 STUDENT DATA
+  const [department, setDepartment] = useState("");
+  const [section, setSection] = useState("");
+  const [studentId, setStudentId] = useState("");
+
+  // 🔥 SECTIONS (10 per dept)
+  const sections = [
+    "611", "612", "613", "614", "615",
+    "701", "702", "703", "704", "705"
+  ];
+
+  const deptSections = {
+    CSE: sections,
+    IT: sections,
+    ECE: sections,
+    ME: sections,
+    CIVIL: sections
+  };
+
   // 🔥 LOAD EVENTS
   useEffect(() => {
     const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
@@ -13,15 +32,17 @@ export default function ApplyLeave() {
   }, []);
 
   const handleSubmit = () => {
-    if (!eventId || !reason) {
+    if (!eventId || !reason || !department || !section || !studentId) {
       alert("Fill all fields");
       return;
     }
 
     const newRequest = {
       id: Date.now(),
-      studentId: "24BCS10185", // temporary
-      eventId: String(eventId), // 🔥 ensure same type
+      studentId: studentId.trim().toUpperCase(),
+      department,
+      section,
+      eventId: String(eventId),
       leaveType,
       reason,
       status: "PENDING"
@@ -33,9 +54,13 @@ export default function ApplyLeave() {
 
     alert("Leave Applied");
 
+    // 🔄 RESET
     setEventId("");
     setReason("");
     setLeaveType("DAY");
+    setDepartment("");
+    setSection("");
+    setStudentId("");
   };
 
   return (
@@ -49,6 +74,49 @@ export default function ApplyLeave() {
       </div>
 
       <div className="form-card">
+
+        {/* STUDENT DETAILS */}
+        <div className="form-section">
+          <h3>Student Details</h3>
+
+          {/* DEPARTMENT */}
+          <select
+            value={department}
+            onChange={(e) => {
+              setDepartment(e.target.value);
+              setSection(""); // reset section
+            }}
+          >
+            <option value="">Select Department</option>
+            {Object.keys(deptSections).map((dept) => (
+              <option key={dept} value={dept}>
+                {dept}
+              </option>
+            ))}
+          </select>
+
+          {/* SECTION */}
+          <select
+            value={section}
+            onChange={(e) => setSection(e.target.value)}
+            disabled={!department}
+          >
+            <option value="">Select Section</option>
+            {department &&
+              deptSections[department].map((sec) => (
+                <option key={sec} value={sec}>
+                  {sec}
+                </option>
+              ))}
+          </select>
+
+          {/* UID */}
+          <input
+            placeholder="Enter UID"
+            value={studentId}
+            onChange={(e) => setStudentId(e.target.value)}
+          />
+        </div>
 
         {/* EVENT SELECT */}
         <div className="form-section">
@@ -93,6 +161,7 @@ export default function ApplyLeave() {
           />
         </div>
 
+        {/* SUBMIT */}
         <button onClick={handleSubmit}>
           Submit Request
         </button>

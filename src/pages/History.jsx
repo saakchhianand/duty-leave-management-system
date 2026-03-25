@@ -28,7 +28,7 @@ export default function History() {
         </p>
       </div>
 
-      {/* EMPTY STATE */}
+      {/* EMPTY */}
       {requests.length === 0 ? (
         <p style={{ color: "#64748b", textAlign: "center" }}>
           No requests found
@@ -37,20 +37,26 @@ export default function History() {
         <div className="events-grid">
           {requests
             .slice()
-            .reverse() // latest first
+            .reverse()
             .map((r) => (
               <div key={r.id} className="event-card">
 
                 <div className="event-content">
 
-                  {/* EVENT NAME */}
+                  {/* EVENT */}
                   <h3>{getEventTitle(r.eventId)}</h3>
 
-                  {/* DETAILS */}
+                  {/* STUDENT */}
+                  <p style={{ fontSize: "13px", color: "#94a3b8" }}>
+                    {r.studentId} • {r.department} - {r.section}
+                  </p>
+
+                  {/* REASON */}
                   <p className="event-desc">
                     {r.reason}
                   </p>
 
+                  {/* TYPE */}
                   <div className="event-meta">
                     <span>{r.leaveType}</span>
                   </div>
