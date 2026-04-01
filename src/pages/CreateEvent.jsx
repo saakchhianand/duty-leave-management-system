@@ -1,171 +1,82 @@
 import { useState } from "react";
+import API from "../api.js";
 
 export default function CreateEvent() {
   const [form, setForm] = useState({
-    title: "",
-    category: "",
-    date: "",
-    time: "",
-    eligibility: "",
-    description: "",
-    poster: ""
+    title: "", category: "", date: "", time: "", venue: "", eligibility: "", description: "", poster: ""
   });
-
   const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-
-    // 🔥 FILE (poster only)
     if (files && files[0]) {
-      const file = files[0];
       const reader = new FileReader();
-
       reader.onloadend = () => {
-        const base64 = reader.result;
-
-        setForm((prev) => ({
-          ...prev,
-          poster: base64
-        }));
-
-        setPreview(base64);
+        setForm((prev) => ({ ...prev, poster: reader.result }));
+        setPreview(reader.result);
       };
-
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(files[0]);
     } else {
-      // 🔤 TEXT INPUTS
-      setForm((prev) => ({
-        ...prev,
-        [name]: value
-      }));
+      setForm((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleSubmit = () => {
-    if (!form.title || !form.date) {
-      alert("Fill required fields");
-      return;
-    }
-
-    const existing = JSON.parse(localStorage.getItem("events")) || [];
-
-    const newEvent = {
-      id: Date.now(),
-      ...form
-    };
-
-    existing.push(newEvent);
-    localStorage.setItem("events", JSON.stringify(existing));
-
-    alert("Event Created");
-
-    // 🔄 reset
-    setForm({
-      title: "",
-      category: "",
-      date: "",
-      time: "",
-      eligibility: "",
-      description: "",
-      poster: ""
-    });
-
-    setPreview(null);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await API.post("/events/create", form);
+      if (res.data.success) {
+        alert("🚀 Event Published!");
+        setForm({ title: "", category: "", date: "", time: "", venue: "", eligibility: "", description: "", poster: "" });
+        setPreview(null);
+      }
+    } catch (err) { alert("Error saving event."); }
+    finally { setLoading(false); }
   };
 
   return (
-    <>
-      {/* HEADER */}
-      <div style={{ marginBottom: "30px" }}>
-        <h2>Create Event</h2>
-        <p style={{ color: "#94a3b8", fontSize: "14px" }}>
-          Add new event details for students
-        </p>
-      </div>
-
-      <div className="form-card">
-
-        {/* BASIC INFO */}
-        <div className="form-section">
-          <h3>Basic Information</h3>
-
-          <input
-            name="title"
-            placeholder="Event Title"
-            value={form.title}
-            onChange={handleChange}
-          />
-
-          <input
-            name="category"
-            placeholder="Category"
-            value={form.category}
-            onChange={handleChange}
-          />
-        </div>
-
-        {/* DATE & TIME */}
-        <div className="form-section">
-          <h3>Schedule</h3>
-
-          <div className="row">
-            <input
-              type="date"
-              name="date"
-              value={form.date}
-              onChange={handleChange}
-            />
-
-            <input
-              type="time"
-              name="time"
-              value={form.time}
-              onChange={handleChange}
-            />
+    <div className="main">
+      <h2 className="neon-text">Create Event</h2>
+      <div className="form-card" style={{ maxWidth: "600px" }}>
+        <form onSubmit={handleSubmit}>
+          <div className="form-section spaced">
+            <h3>Basic Info</h3>
+            <input name="title" placeholder="Event Title" value={form.title} onChange={handleChange} required />
+            <select name="category" value={form.category} onChange={handleChange} style={{marginTop: '10px'}}>
+              <option value="">Select Category</option>
+              <option value="Technical">Technical</option>
+              <option value="Cultural">Cultural</option>
+            </select>
           </div>
-        </div>
+          
+          <div className="form-section spaced">
+            <h3>Schedule & Location</h3>
+            <div style={{display:'flex', gap:'10px'}}>
+              <input type="date" name="date" value={form.date} onChange={handleChange} required />
+              <input type="time" name="time" value={form.time} onChange={handleChange} />
+            </div>
+            <input name="venue" placeholder="Venue (e.g. Auditorium)" value={form.venue} onChange={handleChange} style={{marginTop: '10px'}} />
+            <input name="eligibility" placeholder="Eligibility (e.g. 2nd Year, All Depts)" value={form.eligibility} onChange={handleChange} style={{marginTop: '10px'}} />
+          </div>
 
-        {/* DETAILS */}
-        <div className="form-section">
-          <h3>Details</h3>
+          <div className="form-section spaced">
+            <h3>Description</h3>
+            <textarea name="description" placeholder="Short event summary..." value={form.description} onChange={handleChange} style={{height: '100px', width: '100%'}} />
+          </div>
 
-          <input
-            name="eligibility"
-            placeholder="Eligibility"
-            value={form.eligibility}
-            onChange={handleChange}
-          />
+          <div className="form-section spaced">
+            <h3>Poster</h3>
+            <input type="file" accept="image/*" onChange={handleChange} />
+            {preview && <img src={preview} alt="" style={{ maxWidth: "150px", marginTop: "10px", borderRadius: "8px" }} />}
+          </div>
 
-          <textarea
-            name="description"
-            placeholder="Event Description"
-            value={form.description}
-            onChange={handleChange}
-            rows="3"
-          />
-        </div>
-
-        {/* POSTER ONLY */}
-        <div className="form-section">
-          <h3>Event Poster</h3>
-
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleChange}
-          />
-
-          {preview && (
-            <img src={preview} alt="preview" className="preview-img" />
-          )}
-        </div>
-
-        <button onClick={handleSubmit}>
-          Create Event
-        </button>
-
+          <button type="submit" className="primary" disabled={loading} style={{width:'100%'}}>
+            {loading ? "Publishing..." : "Publish Event"}
+          </button>
+        </form>
       </div>
-    </>
+    </div>
   );
 }

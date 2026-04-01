@@ -1,77 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import API from "../api";
 
 export default function History() {
+  const { user } = useContext(AuthContext);
   const [requests, setRequests] = useState([]);
-  const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    const req = JSON.parse(localStorage.getItem("requests")) || [];
-    const ev = JSON.parse(localStorage.getItem("events")) || [];
-
-    setRequests(req);
-    setEvents(ev);
-  }, []);
-
-  // 🔥 map eventId → title
-  const getEventTitle = (id) => {
-    const event = events.find(e => String(e.id) === String(id));
-    return event ? event.title : "Unknown Event";
-  };
+    if (user?.uid) API.get(`/leave/student/${user.uid}`).then(res => setRequests(res.data));
+  }, [user]);
 
   return (
-    <>
-      {/* HEADER */}
-      <div style={{ marginBottom: "30px" }}>
-        <h2>Request History</h2>
-        <p style={{ color: "#94a3b8", fontSize: "14px" }}>
-          View all your duty leave applications
-        </p>
+    <div className="main">
+      <h2>Your Applications</h2>
+      <div className="grid" style={{marginTop: "20px"}}>
+        {requests.map(r => (
+          <div key={r.id} className="card" style={{display: "flex", gap: "15px"}}>
+            <div style={{flex: 1}}>
+              <h3 style={{color: "var(--primary)"}}>{r.event_name}</h3>
+              <p style={{fontSize: "12px", color: "#94a3b8"}}>{r.applied_at.split('T')[0]}</p>
+              <p style={{margin: "10px 0"}}>{r.reason}</p>
+              <span className={`status ${r.status.toLowerCase()}`}>{r.status}</span>
+            </div>
+            {r.image_proof && (
+              <img src={r.image_proof} style={{width: "80px", height: "80px", objectFit: "cover", borderRadius: "8px", border: "1px solid #1e293b"}} alt="proof" />
+            )}
+          </div>
+        ))}
       </div>
-
-      {/* EMPTY */}
-      {requests.length === 0 ? (
-        <p style={{ color: "#64748b", textAlign: "center" }}>
-          No requests found
-        </p>
-      ) : (
-        <div className="events-grid">
-          {requests
-            .slice()
-            .reverse()
-            .map((r) => (
-              <div key={r.id} className="event-card">
-
-                <div className="event-content">
-
-                  {/* EVENT */}
-                  <h3>{getEventTitle(r.eventId)}</h3>
-
-                  {/* STUDENT */}
-                  <p style={{ fontSize: "13px", color: "#94a3b8" }}>
-                    {r.studentId} • {r.department} - {r.section}
-                  </p>
-
-                  {/* REASON */}
-                  <p className="event-desc">
-                    {r.reason}
-                  </p>
-
-                  {/* TYPE */}
-                  <div className="event-meta">
-                    <span>{r.leaveType}</span>
-                  </div>
-
-                  {/* STATUS */}
-                  <span className={`status ${r.status.toLowerCase()}`}>
-                    {r.status}
-                  </span>
-
-                </div>
-
-              </div>
-            ))}
-        </div>
-      )}
-    </>
+    </div>
   );
 }
