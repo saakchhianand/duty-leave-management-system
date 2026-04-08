@@ -41,7 +41,6 @@ export default function Events() {
                 <p>📍 <b>Venue:</b> {e.venue || 'TBA'}</p>
                 <p>🎓 <b>Eligibility:</b> {e.eligibility || 'Open'}</p>
               </div>
-              <button className="primary" style={{ width: "100%" }}>Register Now</button>
             </div>
           </div>
         ))}
